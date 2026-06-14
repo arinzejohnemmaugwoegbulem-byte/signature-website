@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Signature App</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    text-align:center;
+    background:#f4f4f4;
+    padding:20px;
+}
+
+.container{
+    background:white;
+    max-width:700px;
+    margin:auto;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+canvas{
+    border:2px solid #000;
+    background:white;
+    touch-action:none;
+}
+
+button{
+    padding:10px 20px;
+    margin:10px;
+    cursor:pointer;
+    font-size:16px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>📄 Digital Signature Website</h1>
+
+    <p>Draw your signature below:</p>
+
+    <canvas id="canvas" width="600" height="250"></canvas>
+
+    <br>
+
+    <button onclick="clearCanvas()">Clear</button>
+    <button onclick="downloadSignature()">Download Signature</button>
+
+    <h3>Preview</h3>
+    <img id="preview" width="300">
+</div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let drawing = false;
+
+canvas.addEventListener("mousedown", startDraw);
+canvas.addEventListener("mouseup", stopDraw);
+canvas.addEventListener("mousemove", draw);
+
+canvas.addEventListener("touchstart", startTouch);
+canvas.addEventListener("touchend", stopDraw);
+canvas.addEventListener("touchmove", drawTouch);
+
+function startDraw(e){
+    drawing = true;
+    ctx.beginPath();
+    ctx.moveTo(e.offsetX, e.offsetY);
+}
+
+function draw(e){
+    if(!drawing) return;
+
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.stroke();
+}
+
+function stopDraw(){
+    drawing = false;
+}
+
+function startTouch(e){
+    drawing = true;
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+
+    ctx.beginPath();
+    ctx.moveTo(
+        touch.clientX - rect.left,
+        touch.clientY - rect.top
+    );
+}
+
+function drawTouch(e){
+    if(!drawing) return;
+
+    e.preventDefault();
+
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+
+    ctx.lineTo(
+        touch.clientX - rect.left,
+        touch.clientY - rect.top
+    );
+
+    ctx.stroke();
+}
+
+function clearCanvas(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+function downloadSignature(){
+    const image = canvas.toDataURL("image/png");
+
+    document.getElementById("preview").src = image;
+
+    const link = document.createElement("a");
+    link.href = image;
+    link.download = "signature.png";
+    link.click();
+}
+</script>
+
+</body>
+</html>
